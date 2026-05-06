@@ -1,0 +1,24 @@
+services:
+  pocketbase:
+      build: ./
+      container_name: pocketbase_server
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "50m"
+          max-file: "5"
+      labels:
+        logging: "promtail"
+        logging_jobname: "pocketbase-logs"
+      restart: unless-stopped
+      command: ["./pocketbase", "serve", "--http=0.0.0.0:9000"]
+      ports:
+        - "9000:9000"
+      volumes:
+        - ./ipmv/pocketbase/data:/pocketbase/pb_data
+      healthcheck:
+        #optional (recommended) since v0.10.0
+        test: wget --no-verbose --tries=3 --spider http://127.0.0.1:9000/api/health || exit 1
+        interval: 5s
+        timeout: 5s
+        retries: 5
